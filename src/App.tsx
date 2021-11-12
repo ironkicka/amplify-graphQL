@@ -1,7 +1,9 @@
 import React from 'react';
 import './App.css';
 import {AmplifySignOut, withAuthenticator} from "@aws-amplify/ui-react";
-
+import config from "./aws-exports"
+import {Amplify} from "aws-amplify";
+Amplify.configure(config)
 function App() {
   return (
    <div>
