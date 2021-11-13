@@ -1,5 +1,4 @@
-import {HashRouter, Route, Routes, useLocation} from "react-router-dom";
-import {useEffect, useState} from "react";
+import {HashRouter, Route, Routes} from "react-router-dom";
 import Nav from "./Nav";
 import Public from "./Public";
 import Protected from "./Protected";

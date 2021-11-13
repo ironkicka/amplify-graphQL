@@ -1,7 +1,7 @@
 import {useEffect, useState} from "react";
 import {Auth} from "aws-amplify";
 import Container from "./Container";
-import {AmplifyAuthenticator, AmplifySignIn, AmplifySignOut, withAuthenticator} from "@aws-amplify/ui-react";
+import {AmplifyAuthenticator, AmplifySignOut} from "@aws-amplify/ui-react";
 
 type UserInfo = {
     username: string,
