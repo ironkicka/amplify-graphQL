@@ -1,6 +1,5 @@
 import {Auth} from "aws-amplify";
 import React, {useEffect} from "react";
-import {useNavigate} from "react-router-dom";
 
 interface ProtectedRouteProps {
     route: string;
@@ -8,7 +7,6 @@ interface ProtectedRouteProps {
 
 const protectedRoute =
     <P extends object>(Component: React.ComponentType<P>): React.FC<P & ProtectedRouteProps> => ({route='/profile',...props}: ProtectedRouteProps)=>{
-    // let navigate = useNavigate();
     const checkAuthState = async () => {
         try {
             await Auth.currentAuthenticatedUser()
