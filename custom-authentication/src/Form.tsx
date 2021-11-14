@@ -1,12 +1,19 @@
 import React, {SetStateAction, useState} from "react";
 import {Auth} from "aws-amplify";
+import SignUp from "./SignUp";
+import SignIn from "./SignIn";
+import ConfirmSignUp from "./ConfirmSignUp";
+import ForgotPassword from "./ForgotPassword";
+import ForgotPasswordSubmit from "./ForgotPasswordSubmit";
 
 type FormType =
     'signIn'|
     'confirmSignUp'|
-    'forgotPasswordSubmit'
+    'forgotPassword'|
+    'forgotPasswordSubmit'|
+    'signUp'
 
-type FormInput ={
+export type FormInput ={
     username:string;
     password:string;
     email:string;
@@ -22,7 +29,7 @@ type CognitoUserInfo = {
 
 type SingIn = {
     formInputs:Pick<FormInput,'username'|'password'>
-    setUser: React.Dispatch<React.SetStateAction<CognitoUserInfo>>
+    setUser: React.Dispatch<React.SetStateAction<CognitoUserInfo|null>>
 }
 
 type SingUp = {
@@ -30,17 +37,17 @@ type SingUp = {
     updateFormType: React.Dispatch<React.SetStateAction<FormType>>
 }
 
-type ConfirmSignUp = {
+type ConfirmSignUpArgs = {
     formInputs:Pick<FormInput,'username'|'confirmationCode'>
     updateFormType: React.Dispatch<React.SetStateAction<FormType>>
 }
 
-type ForgotPassword = {
+type ForgotPasswordArgs = {
     formInputs:Pick<FormInput,'username'>
     updateFormType: React.Dispatch<React.SetStateAction<FormType>>
 }
 
-type ForgotPasswordSubmit = {
+type ForgotPasswordSubmitArgs = {
     formInputs:Pick<FormInput,'username'|'confirmationCode'|'password'>
     updateFormType: React.Dispatch<React.SetStateAction<FormType>>
 }
@@ -73,7 +80,7 @@ const signUp = async ({formInputs,updateFormType}:SingUp)=>{
     }
 }
 
-const confirmSignUp = async ({formInputs,updateFormType}:ConfirmSignUp)=>{
+const confirmSignUp = async ({formInputs,updateFormType}:ConfirmSignUpArgs)=>{
     try {
         await Auth.confirmSignUp(formInputs.username,formInputs.confirmationCode)
         updateFormType('signIn')
@@ -82,7 +89,7 @@ const confirmSignUp = async ({formInputs,updateFormType}:ConfirmSignUp)=>{
     }
 }
 
-const forgotPassword = async ({formInputs,updateFormType}:ForgotPassword)=>{
+const forgotPassword = async ({formInputs,updateFormType}:ForgotPasswordArgs)=>{
     try {
         await Auth.forgotPassword(formInputs.username)
         updateFormType('forgotPasswordSubmit')
@@ -91,7 +98,7 @@ const forgotPassword = async ({formInputs,updateFormType}:ForgotPassword)=>{
     }
 }
 
-const forgotPasswordSubmit = async ({formInputs,updateFormType}:ForgotPasswordSubmit)=>{
+const forgotPasswordSubmit = async ({formInputs,updateFormType}:ForgotPasswordSubmitArgs)=>{
     try {
         await Auth.forgotPasswordSubmit(formInputs.username,formInputs.confirmationCode,formInputs.password)
         updateFormType('signIn')
@@ -131,7 +138,7 @@ const styles = {
         padding:'0px 25px',
         marginTop:15,
         marginBottom:0,
-        textAlign:'center',
+        textAlign:'center' as const,
         color:'rgba(0,0,0,0.6)'
     },
     resetPassword:{
@@ -143,15 +150,96 @@ const styles = {
     }
 }
 
-const Form:React.FC = (props)=>{
+const Form = ({setUser}:{setUser:React.Dispatch<React.SetStateAction<CognitoUserInfo|null>>})=>{
     const [formType,updateFormType] = useState<FormType>('signIn');
-    const [formState,updateFormState] = useState(initialFormState);
+    const [formState,updateFormState] = useState<FormInput>(initialFormState);
+
+    const updateForm = (event:any)=>{
+        const newFormState = {
+            ...formState,[event.target.name]:event.target.value
+        }
+        updateFormState(newFormState)
+    }
     const renderForm = ()=>{
-        return "hoge"
+        switch(formType){
+            case 'signUp':
+                return(
+                    <SignUp
+                        signUp={()=>signUp({formInputs:formState,updateFormType})}
+                        updateForm={updateForm}
+                    />
+                )
+            case 'confirmSignUp':
+                return(
+                    <ConfirmSignUp
+                        confirmSignUp={()=>confirmSignUp({formInputs:formState,updateFormType})}
+                        updateForm={updateForm}
+                    />
+                )
+            case 'signIn':
+                return(
+                    <SignIn
+                        signIn={()=>signIn({formInputs:formState,setUser})}
+                        updateForm={updateForm}
+                    />
+                )
+            case 'forgotPassword':
+                return(
+                    <ForgotPassword
+                        forgotPassword={()=>forgotPassword({formInputs:formState,updateFormType})}
+                        updateForm={updateForm}
+                    />
+                )
+            case 'forgotPasswordSubmit':
+                return(
+                    <ForgotPasswordSubmit
+                        forgotPasswordSubmit={()=>forgotPasswordSubmit({formInputs:formState,updateFormType})}
+                        updateForm={updateForm}
+                    />
+                )
+            default:
+                return null;
+        }
     }
     return(
         <div>
             {renderForm()}
+            {formType === 'signUp' &&(
+                <p
+                    style={styles.toggleForm}
+                >Already have an account?
+                    <span
+                        style={styles.anchor}
+                        onClick={()=>{updateFormType('signIn')}}
+                    >
+                        Sign In
+                    </span>
+                </p>
+            )}
+            {formType === 'signIn' && (
+                <>
+                    <p
+                        style={styles.toggleForm}
+                    >Need an account?
+                        <span
+                            style={styles.anchor}
+                            onClick={()=>{updateFormType('signUp')}}
+                        >
+                        Sign Up
+                    </span>
+                    </p>
+                    <p
+                        style={{...styles.toggleForm,...styles.resetPassword}}
+                    >Forgot your password?
+                        <span
+                            style={styles.anchor}
+                            onClick={()=>{updateFormType('forgotPassword')}}
+                        >
+                        Reset Password
+                    </span>
+                    </p>
+                </>
+            )}
         </div>
     )
 }

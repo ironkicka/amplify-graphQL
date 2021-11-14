@@ -2,19 +2,22 @@ import Button from "./Button";
 import React from "react";
 import {styles} from "./Form";
 
-const SignIn = ({signIn,updateFormState}:{signIn:()=>void,updateFormState:React.SetStateAction<any>})=>{
+const SignIn = ({signIn,updateForm}:{
+    signIn:()=>void,
+    updateForm:(e:React.ChangeEvent<HTMLInputElement>)=>void;
+})=>{
     return (
         <div style={styles.container}>
             <input
                 name={'username'}
-                onChange={e=>{e.persist();updateFormState(e)}}
+                onChange={e=>{e.persist();updateForm(e)}}
                 style={styles.input}
                 placeholder={'username'}
             />
             <input
                 type={'password'}
                 name={'password'}
-                onChange={e=>{e.persist();updateFormState(e)}}
+                onChange={e=>{e.persist();updateForm(e)}}
                 style={styles.input}
                 placeholder={'password'}
             />
