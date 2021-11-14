@@ -30,15 +30,15 @@ const Profile = () => {
         try {
             const data = await Auth.currentUserPoolUser()
             const userInfo = {username: data.username, ...data.attributes}
+            console.log(userInfo)
             setUser(userInfo)
         } catch (err) {
             console.log('error: ', err)
-        }
-        ;
+        };
     }
 
     const signOut = () => {
-        Auth.signOut({global: true}).catch(err => console.log('error signing out: ', err));
+        Auth.signOut().catch(err => console.log('error signing out: ', err));
     }
     if (user) {
         return (
