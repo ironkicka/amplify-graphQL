@@ -18,7 +18,7 @@ const styles = {
     }
 }
 
-const Button = ({onClick,title}:{onClick:React.MouseEventHandler<HTMLButtonElement>,title:string})=>{
+const Button = ({onClick,title}:{onClick:()=>void,title:string})=>{
     return (
         <button
             style={styles.button}
