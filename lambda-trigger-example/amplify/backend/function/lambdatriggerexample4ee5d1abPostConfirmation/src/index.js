@@ -28,7 +28,7 @@ const modules = moduleNames.map(name => require(`./${name}`));
  *
  * The handler response.
  */
-exports.handler = async event => {
+exports.handler = async (event )=> {
   /**
    * Instead of naively iterating over all handlers, run them concurrently with
    * `await Promise.all(...)`. This would otherwise just be determined by the
