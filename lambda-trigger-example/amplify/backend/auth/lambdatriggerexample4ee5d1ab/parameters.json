@@ -1,6 +1,6 @@
 {
     "identityPoolName": "lambdatriggerexample4ee5d1ab_identitypool_4ee5d1ab",
-    "allowUnauthenticatedIdentities": false,
+    "allowUnauthenticatedIdentities": true,
     "resourceNameTruncated": "lambda4ee5d1ab",
     "userPoolName": "lambdatriggerexample4ee5d1ab_userpool_4ee5d1ab",
     "autoVerifiedAttributes": [
