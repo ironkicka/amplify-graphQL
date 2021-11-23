@@ -23,7 +23,7 @@ const {v4: uuid} = require('uuid');
 const cognito = new AWS.CognitoIdentityServiceProvider({
     apiVersion: '2016-04-18',
 })
-const userpoolId = process.env.eccommerce
+const userpoolId = process.env.AUTH_ECOMMERCEAPP7553087A_USERPOOLID;
 const region = process.env.REGION;
 const ddb_table_name = process.env.STORAGE_PRODUCTTABLE_NAME
 const docClient = new AWS.DynamoDB.DocumentClient({region});
@@ -49,17 +49,16 @@ const getGroupForUser = async (event) => {
 
     let userParams = {
         UserPoolId: userpoolId,
-        Filter: `sub "${userSub}"`
+        Filter: `sub = "${userSub}"`
     }
-
     let userData = await cognito.listUsers(userParams).promise()
     const user = userData.Users[0];
     const groupParams = {
         UserPoolId: userpoolId,
         Username: user.Username
     }
-
     const groupData = await cognito.adminListGroupsForUser(groupParams).promise()
+    console.log(groupData)
     return groupData;
 }
 
@@ -69,9 +68,10 @@ const canPerformAction = async (event, group) => {
             return reject();
         }
 
-        const groupData = await getGroupForUser;
-        const groupsForUser = groupData.Groups.map(group => group.groupName)
-
+        const groupData = await getGroupForUser(event);
+        console.log(groupData)
+        const groupsForUser = groupData.Groups.map(group => group.GroupName)
+        console.log(groupsForUser)
         if (groupsForUser.includes(group)) {
             resolve()
         } else {
@@ -108,6 +108,7 @@ app.post('/products', async (req, res) => {
     const {event} = req.apiGateway;
     try {
         await canPerformAction(event, 'Admin');
+        console.log("アドミンだーーー")
         const input = {...body, id: uuid()}
         const params = {
             TableName: ddb_table_name,
@@ -116,9 +117,9 @@ app.post('/products', async (req, res) => {
         await docClient.put(params).promise();
         const response = {
             statusCode: 200,
-            body: JSON.stringify({})
+            message:""
         }
-        res.json(response);
+        res.send(response);
     } catch (err) {
         res.json({error: err});
     }
