@@ -26,7 +26,6 @@ function App() {
         {user &&
         <AmplifyGreetings username={user.getUsername()}/>
         }
-      <AmplifySignOut/>
     </div>
   );
 }
