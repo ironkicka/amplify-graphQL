@@ -1,26 +1,34 @@
-import React from 'react';
+import React, {useEffect, useState} from 'react';
 import logo from './logo.svg';
 import './App.css';
+import {AmplifyGreetings, AmplifySignOut, withAuthenticator} from "@aws-amplify/ui-react";
+import {Auth} from "aws-amplify";
+import {CognitoUser} from "amazon-cognito-identity-js";
 
 function App() {
+    const [user,setUser] = useState<CognitoUser|null>(null);
+    const checkUser = async ()=>{
+        await Auth.currentAuthenticatedUser()
+            .then((user:CognitoUser)=>{
+                setUser(user)
+            })
+    }
+
+    useEffect(()=>{
+        checkUser();
+    },[])
+
   return (
     <div className="App">
       <header className="App-header">
         <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
       </header>
+        {user &&
+        <AmplifyGreetings username={user.getUsername()}/>
+        }
+      <AmplifySignOut/>
     </div>
   );
 }
 
-export default App;
+export default withAuthenticator(App);
