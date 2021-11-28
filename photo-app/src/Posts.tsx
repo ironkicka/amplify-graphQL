@@ -1,11 +1,9 @@
 import {OnCreatePostSubscription, Post} from "./API";
 import {API, graphqlOperation, Storage} from "aws-amplify";
-import {useEffect, useReducer} from "react";
+import {useEffect, useReducer, useState} from "react";
 import {listPosts} from "./graphql/queries";
 import {isDefined} from "./utils";
 import {GraphQLResult} from '@aws-amplify/api-graphql'
-import * as subscriptions from './graphql/subscriptions';
-import Observable from 'zen-observable'
 import {onCreatePost} from "./graphql/subscriptions";
 
 interface SetPosts {
@@ -58,6 +56,23 @@ type PostSubscriptionEvent = { value: { data: OnCreatePostSubscription } };
 
 const Posts = () => {
     const [posts, dispatch] = useReducer(reducer, [])
+    // const [posts2,updatePost]= useState<ClientPost[]>([]);
+
+    const update = async ({value: {data}}: PostSubscriptionEvent) => {
+        const newPost = data.onCreatePost;
+        if (!newPost || !newPost.imageKey) return;
+        const signedUrl = await Storage.get(newPost.imageKey)
+        const newClientPost: ClientPost = {
+            id: newPost.id,
+            imageKey: newPost.imageKey,
+            title: newPost.title,
+            imageUrl: signedUrl
+        }
+        // const newPosts = [...posts2,newClientPost]
+        // updatePost(newPosts)
+        // updatePost(prevState => [...prevState,newClientPost])
+        dispatch({type: 'ADD_POST', post: newClientPost})
+    }
 
     useEffect(() => {
         fetchPosts();
@@ -66,18 +81,7 @@ const Posts = () => {
         )
         if ("subscribe" in client) {
             const subscription = client.subscribe({
-                next: async ({value: {data}}: PostSubscriptionEvent) => {
-                    const newPost = data.onCreatePost;
-                    if (!newPost || !newPost.imageKey) return;
-                    const signedUrl = await Storage.get(newPost.imageKey)
-                    const newClientPost: ClientPost = {
-                        id: newPost.id,
-                        imageKey: newPost.imageKey,
-                        title: newPost.title,
-                        imageUrl: signedUrl
-                    }
-                    dispatch({type: 'ADD_POST', post: newClientPost})
-                }
+                next:update
             })
 
             return () => subscription.unsubscribe();
@@ -90,6 +94,7 @@ const Posts = () => {
         if (!items) return;
         const signedPosts = await getSignedPosts(items)
         dispatch({type: 'SET_POSTS', posts: signedPosts})
+        // updatePost(signedPosts)
     }
     return (
         <div>
@@ -100,6 +105,12 @@ const Posts = () => {
                     <h3 style={postTitle}>{post.title}</h3>
                 </div>
             ))}
+            {/*{posts2.map(post => (*/}
+            {/*    <div key={post.id} style={postContainer}>*/}
+            {/*        <img style={postImage} src={post.imageUrl} alt=""/>*/}
+            {/*        <h3 style={postTitle}>{post.title}</h3>*/}
+            {/*    </div>*/}
+            {/*))}*/}
         </div>
     )
 }
